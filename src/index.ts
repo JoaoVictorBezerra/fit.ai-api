@@ -1,13 +1,15 @@
 import "dotenv/config";
 
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUI from "@fastify/swagger-ui";
 import Fastify from "fastify";
 import {
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import z from "zod";
-
 const app = Fastify({
   logger: true,
 });
@@ -15,19 +17,48 @@ const app = Fastify({
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
-app.withTypeProvider<ZodTypeProvider>().route({
-  method: "GET",
-  url: "/",
-  schema: {
-    response: {
-      200: z.object({
-        message: z.string(),
-      }),
+app.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: "FIT.AI",
+      description: "FIT.AI backend service",
+      version: "1.0.0",
     },
+    servers: [
+      {
+        url: "http://localhost:8081",
+        description: "Local server",
+      },
+      {
+        url: "https://api.fit.ai",
+        description: "Production server",
+      },
+    ],
   },
-  handler: () => {
-    return { message: "Hello World" };
-  },
+  transform: jsonSchemaTransform,
+});
+
+app.register(fastifySwaggerUI, {
+  routePrefix: "/docs",
+});
+
+app.after(() => {
+  app.withTypeProvider<ZodTypeProvider>().route({
+    method: "GET",
+    url: "/",
+    schema: {
+      description: "Hello World",
+      tags: ["hello"],
+      response: {
+        200: z.object({
+          message: z.string(),
+        }),
+      },
+    },
+    handler: () => {
+      return { message: "Hello World" };
+    },
+  });
 });
 
 try {
