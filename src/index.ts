@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUI from "@fastify/swagger-ui";
+import fastifyApiReference from "@scalar/fastify-api-reference";
 import Fastify from "fastify";
 import {
   jsonSchemaTransform,
@@ -41,8 +41,33 @@ app.register(fastifySwagger, {
   transform: jsonSchemaTransform,
 });
 
-app.register(fastifySwaggerUI, {
+app.register(fastifyApiReference, {
   routePrefix: "/docs",
+  configuration: {
+    sources: [
+      {
+        title: "FIT.AI API",
+        slug: "fit-ai-api",
+        url: "/swagger.json",
+      },
+      {
+        title: "FIT.AI Auth API",
+        slug: "fit-ai-auth-api",
+        url: "/api/auth/open-api/generate-schema",
+      },
+    ],
+  },
+});
+
+app.withTypeProvider<ZodTypeProvider>().route({
+  method: "GET",
+  url: "/swagger.json",
+  schema: {
+    hide: true,
+  },
+  handler: async () => {
+    return app.swagger();
+  },
 });
 
 app.register(fastifyCors, {
