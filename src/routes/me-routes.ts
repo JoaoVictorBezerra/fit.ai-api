@@ -15,6 +15,7 @@ export const meRoutes = async (app: FastifyInstance) => {
     schema: {
       tags: ["Me"],
       summary: "Get current user training data",
+      operationId: "getUserTrainData",
       response: {
         200: GetUserTrainDataResponseSchema.nullable(),
         401: ErrorSchema,

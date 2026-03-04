@@ -1,4 +1,4 @@
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import {
   convertToModelMessages,
   stepCountIs,
@@ -78,7 +78,7 @@ export const aiRoutes = async (app: FastifyInstance) => {
     const { messages } = request.body as { messages: UIMessage[] };
 
     const result = streamText({
-      model: openai("gpt-4o-mini"),
+      model: google("gemini-2.5-flash"),
       system: SYSTEM_PROMPT,
       tools: {
         getUserTrainData: tool({
@@ -94,7 +94,9 @@ export const aiRoutes = async (app: FastifyInstance) => {
           description:
             "Cria ou atualiza os dados de treino do usuário (peso em gramas, altura em cm, idade, % gordura corporal).",
           inputSchema: z.object({
-            weightInGrams: z.number().describe("Peso em gramas (1 kg = 1000 g)"),
+            weightInGrams: z
+              .number()
+              .describe("Peso em gramas (1 kg = 1000 g)"),
             heightInCentimeters: z.number().describe("Altura em centímetros"),
             age: z.number().describe("Idade em anos"),
             bodyFatPercentage: z
@@ -130,8 +132,12 @@ export const aiRoutes = async (app: FastifyInstance) => {
             workoutDays: z
               .array(
                 z.object({
-                  name: z.string().describe("Nome do dia (ex: Superior A, Descanso)"),
-                  isRestDay: z.boolean().describe("true se for dia de descanso"),
+                  name: z
+                    .string()
+                    .describe("Nome do dia (ex: Superior A, Descanso)"),
+                  isRestDay: z
+                    .boolean()
+                    .describe("true se for dia de descanso"),
                   weekDay: z.enum(WeekDay).describe("Dia da semana"),
                   coverImageUrl: z
                     .string()

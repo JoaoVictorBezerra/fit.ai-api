@@ -15,6 +15,7 @@ export const homeRoutes = async (app: FastifyInstance) => {
     schema: {
       tags: ["Home"],
       summary: "Get home page data for authenticated user",
+      operationId: "getHomeData",
       params: z.object({
         date: z.string().regex(dateRegex, "Date must be in YYYY-MM-DD format"),
       }),
