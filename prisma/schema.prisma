@@ -61,6 +61,7 @@ model WorkoutDay {
   workoutExercises WorkoutExercise[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  workoutSessions  WorkoutSession[]
 }
 
 model WorkoutExercise {
@@ -74,6 +75,16 @@ model WorkoutExercise {
   restTimeInSeconds Int
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
+}
+
+model WorkoutSession {
+  id           String     @id @default(uuid())
+  workoutDayId String
+  workoutDay   WorkoutDay @relation(fields: [workoutDayId], references: [id], onDelete: Cascade)
+  startedAt    DateTime   @db.Timestamptz
+  completedAt  DateTime?  @db.Timestamptz
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model Session {
