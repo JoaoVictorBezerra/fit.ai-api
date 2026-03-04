@@ -1,4 +1,5 @@
 export const Routes = {
+  HOME: "/v1/home",
   WORKOUT_PLANS: {
     BASE: "/v1/workout/plans",
     // CREATE: "/v1/workout/plans",

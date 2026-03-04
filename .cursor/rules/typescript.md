@@ -25,6 +25,7 @@ paths:
 - **SEMPRE** use kebab-case para nomear arquivos (e.g ./lib/auth-client.ts) com exeção de use cases (use PascalCase).
 - **SEMPRE** use PascalCase para nomear classes.
 - **SEMPRE** use camelCase para nomear variáveis, funções e métodos.
+- **SEMPRE** use o enum WeekDay do prisma quando utilizar os dias da semanas.
 
 ## Datas
 

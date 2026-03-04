@@ -198,7 +198,7 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
         userWorkoutSessionId: z.uuid(),
       }),
       response: {
-        201: CompleteWorkoutSessionResponseSchema,
+        200: CompleteWorkoutSessionResponseSchema,
         401: ErrorSchema,
         403: ErrorSchema,
         404: ErrorSchema,
@@ -224,7 +224,7 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
           userId: session.user.id as string,
         });
 
-        return reply.status(201).send(result);
+        return reply.status(200).send(result);
       } catch (error) {
         if (error instanceof NotFoundError) {
           return reply

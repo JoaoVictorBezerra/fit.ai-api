@@ -13,6 +13,7 @@ import {
 
 import { Routes } from "./constants/index.js";
 import { auth } from "./lib/auth.js";
+import { homeRoutes } from "./routes/home-routes.js";
 import { workoutPlanRoutes } from "./routes/workout-routes.js";
 const app = Fastify({
   logger: true,
@@ -118,6 +119,7 @@ app.after(() => {
     },
   });
 
+  app.register(homeRoutes, { prefix: Routes.HOME });
   app.register(workoutPlanRoutes, { prefix: Routes.WORKOUT_PLANS.BASE });
 });
 

@@ -22,6 +22,28 @@ export const CompleteWorkoutSessionResponseSchema = z.object({
   }),
 });
 
+export const GetHomeResponseSchema = z.object({
+  activeWorkoutPlanid: z.string(),
+  todayWorkoutDay: z
+    .object({
+      id: z.uuid(),
+      name: z.string().trim().min(1),
+      isRest: z.boolean(),
+      weekDay: z.enum(WeekDay),
+      estimatedDurationInSeconds: z.string(),
+      exercisesCount: z.number(),
+    })
+    .nullable(),
+  workoutStreak: z.number(),
+  consistencyByDay: z.record(
+    z.string(),
+    z.object({
+      workoutDayCompleted: z.boolean(),
+      workoutDayStarted: z.boolean(),
+    }),
+  ),
+});
+
 export const WorkoutPlanSchema = z.object({
   id: z.string(),
   name: z.string().trim().min(1),
