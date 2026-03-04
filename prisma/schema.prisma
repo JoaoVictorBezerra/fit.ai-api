@@ -24,14 +24,14 @@ enum WeekDay {
 }
 
 model User {
-  id            String          @id
+  id            String         @id
   workoutPlans  WorkoutPlan[]
   name          String
   email         String
-  emailVerified Boolean         @default(false)
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
   trainData     UserTrainData?
@@ -47,11 +47,9 @@ model UserTrainData {
   weightInGrams       Int
   heightInCentimeters Int
   age                 Int
-  bodyFatPercentage   Float
+  bodyFatPercentage   Int
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-
-  @@map("user_train_data")
 }
 
 model WorkoutPlan {
@@ -73,6 +71,7 @@ model WorkoutDay {
   workoutPlan      WorkoutPlan       @relation(fields: [workoutPlanId], references: [id], onDelete: Cascade)
   isRestDay        Boolean           @default(false)
   weekDay          WeekDay
+  coverImageUrl    String?
   workoutExercises WorkoutExercise[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt

@@ -6,22 +6,23 @@ interface InputDto {
 }
 
 interface OutputDto {
-  workoutPlans: Array<{
-    id: string;
-    name: string;
-    userId: string;
-    isActive: boolean;
-    estimateDurationInSeconds: number;
-    createdAt: Date;
-    updatedAt: Date;
-    workoutDays: Array<{
+    workoutPlans: Array<{
       id: string;
       name: string;
-      workoutPlanId: string;
-      isRestDay: boolean;
-      weekDay: string;
+      userId: string;
+      isActive: boolean;
+      estimateDurationInSeconds: number;
       createdAt: Date;
       updatedAt: Date;
+      workoutDays: Array<{
+        id: string;
+        name: string;
+        workoutPlanId: string;
+        isRestDay: boolean;
+        weekDay: string;
+        coverImageUrl: string | null;
+        createdAt: Date;
+        updatedAt: Date;
       workoutExercises: Array<{
         id: string;
         name: string;
@@ -69,6 +70,7 @@ export class GetWorkoutPlans {
           workoutPlanId: day.workoutPlanId,
           isRestDay: day.isRestDay,
           weekDay: day.weekDay,
+          coverImageUrl: day.coverImageUrl,
           createdAt: day.createdAt,
           updatedAt: day.updatedAt,
           workoutExercises: day.workoutExercises.map((ex) => ({

@@ -142,7 +142,7 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
             name: z.string(),
             isRestDay: z.boolean().default(false),
             weekDay: z.enum(WeekDay),
-            //weekDay: z.enum(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]),
+            coverImageUrl: z.string().url().optional(),
             exercises: z.array(
               z.object({
                 order: z.number().min(0).positive(),

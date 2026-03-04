@@ -16,6 +16,7 @@ interface OutputDto {
     isRest: boolean;
     estimatedDurationInSeconds: number;
     exercisesCount: number;
+    coverImageUrl: string | null;
   }>;
 }
 
@@ -53,6 +54,7 @@ export class GetWorkoutPlanById {
           0,
         ),
         exercisesCount: day._count.workoutExercises,
+        coverImageUrl: day.coverImageUrl,
       })),
     };
   }

@@ -13,6 +13,7 @@ import {
 
 import { Routes } from "./constants/index.js";
 import { auth } from "./lib/auth.js";
+import { aiRoutes } from "./routes/ai-routes.js";
 import { homeRoutes } from "./routes/home-routes.js";
 import { meRoutes } from "./routes/me-routes.js";
 import { statsRoutes } from "./routes/stats-routes.js";
@@ -121,6 +122,7 @@ app.after(() => {
     },
   });
 
+  app.register(aiRoutes);
   app.register(homeRoutes, { prefix: Routes.HOME });
   app.register(meRoutes, { prefix: Routes.ME });
   app.register(statsRoutes, { prefix: Routes.STATS });

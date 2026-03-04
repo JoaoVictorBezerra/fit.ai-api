@@ -111,6 +111,7 @@ export const GetWorkoutPlansResponseSchema = z.object({
           workoutPlanId: z.string().uuid(),
           isRestDay: z.boolean(),
           weekDay: z.string(),
+          coverImageUrl: z.string().url().nullable(),
           createdAt: z.date(),
           updatedAt: z.date(),
           workoutExercises: z.array(
@@ -143,6 +144,7 @@ export const GetWorkoutPlanByIdResponseSchema = z.object({
       isRest: z.boolean(),
       estimatedDurationInSeconds: z.number(),
       exercisesCount: z.number(),
+      coverImageUrl: z.string().url().nullable(),
     }),
   ),
 });

@@ -8,6 +8,7 @@ interface CreateWorkoutPlanDTO {
     name: string;
     isRestDay: boolean;
     weekDay: WeekDay;
+    coverImageUrl?: string;
     exercises: Array<{
       order: number;
       name: string;
@@ -51,6 +52,7 @@ export class CreateWorkoutPlan {
                 name: workDay.name,
                 isRestDay: workDay.isRestDay,
                 weekDay: workDay.weekDay,
+                coverImageUrl: workDay.coverImageUrl,
                 workoutExercises: {
                   create: workDay.exercises.map((exercise) => {
                     return {
