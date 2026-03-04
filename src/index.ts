@@ -13,7 +13,7 @@ import {
 
 import { Routes } from "./constants/index.js";
 import { auth } from "./lib/auth.js";
-import { workoutPlanRoutes } from "./routes/workout-plan.js";
+import { workoutPlanRoutes } from "./routes/workout-routes.js";
 const app = Fastify({
   logger: true,
 });
