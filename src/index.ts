@@ -14,6 +14,7 @@ import {
 import { Routes } from "./constants/index.js";
 import { auth } from "./lib/auth.js";
 import { homeRoutes } from "./routes/home-routes.js";
+import { meRoutes } from "./routes/me-routes.js";
 import { statsRoutes } from "./routes/stats-routes.js";
 import { workoutPlanRoutes } from "./routes/workout-routes.js";
 const app = Fastify({
@@ -121,6 +122,7 @@ app.after(() => {
   });
 
   app.register(homeRoutes, { prefix: Routes.HOME });
+  app.register(meRoutes, { prefix: Routes.ME });
   app.register(statsRoutes, { prefix: Routes.STATS });
   app.register(workoutPlanRoutes, { prefix: Routes.WORKOUT_PLANS.BASE });
 });

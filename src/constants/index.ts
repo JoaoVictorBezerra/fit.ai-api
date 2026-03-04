@@ -1,5 +1,6 @@
 export const Routes = {
   HOME: "/v1/home",
+  ME: "/v1/me",
   STATS: "/v1/stats",
   WORKOUT_PLANS: {
     BASE: "/v1/workout/plans",

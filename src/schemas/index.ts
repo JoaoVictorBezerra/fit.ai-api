@@ -2,6 +2,15 @@ import z from "zod";
 
 import { WeekDay } from "../generated/prisma/enums.js";
 
+export const GetUserTrainDataResponseSchema = z.object({
+  userId: z.string(),
+  userName: z.string(),
+  weightInGrams: z.number(),
+  heightInCentimeters: z.number(),
+  age: z.number(),
+  bodyFatPercentage: z.number(),
+});
+
 export const ErrorSchema = z.object({
   error: z.string().trim().min(1),
   code: z.string().trim().min(1),
