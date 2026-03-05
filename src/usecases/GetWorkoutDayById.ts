@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 
 import { ForbiddenError, NotFoundError } from "../errors/index.js";
-import { prisma } from "../lib/db.js";
+import { IWorkoutDayRepository } from "../repositories/workout/WorkoutDayRepository.js";
 
 interface InputDto {
   userId: string;
@@ -33,18 +33,15 @@ interface OutputDto {
 }
 
 export class GetWorkoutDayById {
+  constructor(
+    private readonly workoutDayRepository: IWorkoutDayRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
-    const workoutDay = await prisma.workoutDay.findFirst({
-      where: {
-        id: dto.dayId,
-        workoutPlanId: dto.planId,
-      },
-      include: {
-        workoutPlan: true,
-        workoutExercises: true,
-        workoutSessions: true,
-      },
-    });
+    const workoutDay = await this.workoutDayRepository.findByIdAndPlanId(
+      dto.dayId,
+      dto.planId,
+    );
 
     if (!workoutDay) throw new NotFoundError("Workout day not found");
 

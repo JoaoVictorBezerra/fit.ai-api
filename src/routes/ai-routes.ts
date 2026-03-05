@@ -11,10 +11,15 @@ import z from "zod";
 
 import { WeekDay } from "../generated/prisma/enums.js";
 import { auth } from "../lib/auth.js";
+import { PrismaUserTrainDataRepository } from "../repositories/user/UserTrainDataRepository.js";
+import { PrismaWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
 import { CreateWorkoutPlan } from "../usecases/CreateWorkoutPlan.js";
 import { GetUserTrainData } from "../usecases/GetUserTrainData.js";
 import { GetWorkoutPlans } from "../usecases/GetWorkoutPlans.js";
 import { UpsertUserTrainData } from "../usecases/UpsertUserTrainData.js";
+
+const workoutPlanRepository = new PrismaWorkoutPlanRepository();
+const userTrainDataRepository = new PrismaUserTrainDataRepository();
 
 const SYSTEM_PROMPT = `Você é um personal trainer virtual especialista em montagem de planos de treino. Suas características:
 
@@ -86,7 +91,9 @@ export const aiRoutes = async (app: FastifyInstance) => {
             "Busca os dados de treino do usuário. SEMPRE chame esta tool antes de qualquer interação.",
           inputSchema: z.object({}),
           execute: async () => {
-            const getUserTrainData = new GetUserTrainData();
+            const getUserTrainData = new GetUserTrainData(
+              userTrainDataRepository,
+            );
             return getUserTrainData.execute({ userId });
           },
         }),
@@ -106,7 +113,9 @@ export const aiRoutes = async (app: FastifyInstance) => {
               .describe("Percentual de gordura corporal (0.15 = 15%)"),
           }),
           execute: async (input) => {
-            const upsertUserTrainData = new UpsertUserTrainData();
+            const upsertUserTrainData = new UpsertUserTrainData(
+              userTrainDataRepository,
+            );
             return upsertUserTrainData.execute({
               userId,
               weightInGrams: input.weightInGrams,
@@ -120,7 +129,9 @@ export const aiRoutes = async (app: FastifyInstance) => {
           description: "Lista os planos de treino do usuário.",
           inputSchema: z.object({}),
           execute: async () => {
-            const getWorkoutPlans = new GetWorkoutPlans();
+            const getWorkoutPlans = new GetWorkoutPlans(
+              workoutPlanRepository,
+            );
             return getWorkoutPlans.execute({ userId });
           },
         }),
@@ -166,7 +177,9 @@ export const aiRoutes = async (app: FastifyInstance) => {
               ),
           }),
           execute: async (input) => {
-            const createWorkoutPlan = new CreateWorkoutPlan();
+            const createWorkoutPlan = new CreateWorkoutPlan(
+              workoutPlanRepository,
+            );
             const result = await createWorkoutPlan.execute({
               userId,
               name: input.name,

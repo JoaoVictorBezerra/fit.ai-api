@@ -4,9 +4,14 @@ import z from "zod";
 
 import { authPreHandler } from "../helpers/index.js";
 import { ErrorSchema, GetHomeResponseSchema } from "../schemas/index.js";
+import { PrismaWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
+import { PrismaWorkoutSessionRepository } from "../repositories/workout/WorkoutSessionRepository.js";
 import { GetHomeData } from "../usecases/GetHomeData.js";
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+const workoutPlanRepository = new PrismaWorkoutPlanRepository();
+const workoutSessionRepository = new PrismaWorkoutSessionRepository();
 
 export const homeRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -28,7 +33,10 @@ export const homeRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const getHomeData = new GetHomeData();
+        const getHomeData = new GetHomeData(
+          workoutPlanRepository,
+          workoutSessionRepository,
+        );
         const result = await getHomeData.execute({
           userId: request.session!.user.id as string,
           date: request.params.date,

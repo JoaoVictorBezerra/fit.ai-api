@@ -1,5 +1,5 @@
 import { NotFoundError } from "../errors/index.js";
-import { prisma } from "../lib/db.js";
+import { IWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
 
 interface InputDto {
   userId: string;
@@ -21,22 +21,14 @@ interface OutputDto {
 }
 
 export class GetWorkoutPlanById {
+  constructor(
+    private readonly workoutPlanRepository: IWorkoutPlanRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
-    const plan = await prisma.workoutPlan.findUnique({
-      where: { id: dto.planId },
-      include: {
-        workoutDays: {
-          include: {
-            workoutExercises: true,
-            _count: {
-              select: {
-                workoutExercises: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const plan = await this.workoutPlanRepository.findByIdWithDaysAndExercises(
+      dto.planId,
+    );
 
     if (!plan || plan.userId !== dto.userId)
       throw new NotFoundError("Workout plan not found");

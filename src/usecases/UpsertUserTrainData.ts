@@ -1,4 +1,4 @@
-import { prisma } from "../lib/db.js";
+import { IUserTrainDataRepository } from "../repositories/user/UserTrainDataRepository.js";
 
 interface InputDto {
   userId: string;
@@ -17,22 +17,17 @@ interface OutputDto {
 }
 
 export class UpsertUserTrainData {
+  constructor(
+    private readonly userTrainDataRepository: IUserTrainDataRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
-    const trainData = await prisma.userTrainData.upsert({
-      where: { userId: dto.userId },
-      create: {
-        userId: dto.userId,
-        weightInGrams: dto.weightInGrams,
-        heightInCentimeters: dto.heightInCentimeters,
-        age: dto.age,
-        bodyFatPercentage: dto.bodyFatPercentage,
-      },
-      update: {
-        weightInGrams: dto.weightInGrams,
-        heightInCentimeters: dto.heightInCentimeters,
-        age: dto.age,
-        bodyFatPercentage: dto.bodyFatPercentage,
-      },
+    const trainData = await this.userTrainDataRepository.upsert({
+      userId: dto.userId,
+      weightInGrams: dto.weightInGrams,
+      heightInCentimeters: dto.heightInCentimeters,
+      age: dto.age,
+      bodyFatPercentage: dto.bodyFatPercentage,
     });
 
     return {

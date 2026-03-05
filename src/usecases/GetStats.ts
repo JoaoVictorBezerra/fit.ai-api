@@ -2,7 +2,8 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 
 import { WeekDay } from "../generated/prisma/enums.js";
-import { prisma } from "../lib/db.js";
+import { IWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
+import { IWorkoutSessionRepository } from "../repositories/workout/WorkoutSessionRepository.js";
 
 dayjs.extend(utc);
 
@@ -44,26 +45,21 @@ interface OutputDto {
 }
 
 export class GetStats {
+  constructor(
+    private readonly workoutPlanRepository: IWorkoutPlanRepository,
+    private readonly workoutSessionRepository: IWorkoutSessionRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
     const fromDate = dayjs.utc(dto.from).startOf("day").toDate();
     const toDate = dayjs.utc(dto.to).endOf("day").toDate();
 
-    const workoutSessions = await prisma.workoutSession.findMany({
-      where: {
-        workoutDay: {
-          workoutPlan: {
-            userId: dto.userId,
-          },
-        },
-        startedAt: {
-          gte: fromDate,
-          lte: toDate,
-        },
-      },
-      include: {
-        workoutDay: true,
-      },
-    });
+    const workoutSessions =
+      await this.workoutSessionRepository.findByUserInDateRange(
+        dto.userId,
+        fromDate,
+        toDate,
+      );
 
     const consistencyByDay: OutputDto["consistencyByDay"] = {};
 
@@ -115,10 +111,8 @@ export class GetStats {
     userId: string,
     fromDate: dayjs.Dayjs,
   ): Promise<number> {
-    const activeWorkoutPlan = await prisma.workoutPlan.findFirst({
-      where: { userId, isActive: true },
-      include: { workoutDays: true },
-    });
+    const activeWorkoutPlan =
+      await this.workoutPlanRepository.findActiveByUserIdWithDays(userId);
 
     if (!activeWorkoutPlan) return 0;
 
@@ -141,13 +135,12 @@ export class GetStats {
       const matchingPlanDay = planDays.find((d) => d.weekDay === weekDay);
       if (!matchingPlanDay) break;
 
-      const completedSession = await prisma.workoutSession.findFirst({
-        where: {
-          workoutDayId: matchingPlanDay.id,
-          completedAt: { not: null },
-          startedAt: { gte: dayStart, lte: dayEnd },
-        },
-      });
+      const completedSession =
+        await this.workoutSessionRepository.findCompletedByDayInDateRange(
+          matchingPlanDay.id,
+          dayStart,
+          dayEnd,
+        );
 
       if (!completedSession) break;
 

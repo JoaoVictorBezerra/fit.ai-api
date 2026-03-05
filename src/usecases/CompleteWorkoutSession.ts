@@ -1,6 +1,6 @@
 import { ForbiddenError, NotFoundError } from "../errors/index.js";
 import { WorkoutSession } from "../generated/prisma/client.js";
-import { prisma } from "../lib/db.js";
+import { IWorkoutSessionRepository } from "../repositories/workout/WorkoutSessionRepository.js";
 
 interface InputDto {
   userWorkoutSessionId: string;
@@ -12,17 +12,15 @@ interface OutputDto {
 }
 
 export class CompleteWorkoutSession {
+  constructor(
+    private readonly workoutSessionRepository: IWorkoutSessionRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
-    const workoutSession = await prisma.workoutSession.findUnique({
-      where: { id: dto.userWorkoutSessionId },
-      include: {
-        workoutDay: {
-          include: {
-            workoutPlan: true,
-          },
-        },
-      },
-    });
+    const workoutSession =
+      await this.workoutSessionRepository.findWorkoutSessionById(
+        dto.userWorkoutSessionId,
+      );
 
     if (!workoutSession) throw new NotFoundError("Workout session not found");
 
@@ -31,10 +29,10 @@ export class CompleteWorkoutSession {
         "Only the workout plan owner can complete a session",
       );
 
-    const updatedWorkoutSession = await prisma.workoutSession.update({
-      where: { id: dto.userWorkoutSessionId },
-      data: { completedAt: new Date() },
-    });
+    const updatedWorkoutSession =
+      await this.workoutSessionRepository.completeWorkoutSession(
+        dto.userWorkoutSessionId,
+      );
 
     return { userWorkoutSession: updatedWorkoutSession };
   }

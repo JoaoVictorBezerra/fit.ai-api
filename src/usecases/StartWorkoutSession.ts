@@ -3,7 +3,8 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "../errors/index.js";
-import { prisma } from "../lib/db.js";
+import { IWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
+import { IWorkoutSessionRepository } from "../repositories/workout/WorkoutSessionRepository.js";
 
 interface InputDto {
   userId: string;
@@ -16,16 +17,16 @@ interface OutputDto {
 }
 
 export class StartWorkoutSession {
+  constructor(
+    private readonly workoutPlanRepository: IWorkoutPlanRepository,
+    private readonly workoutSessionRepository: IWorkoutSessionRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
-    const plan = await prisma.workoutPlan.findUnique({
-      where: { id: dto.planId },
-      include: {
-        workoutDays: {
-          where: { id: dto.dayId },
-          include: { workoutSessions: true },
-        },
-      },
-    });
+    const plan = await this.workoutPlanRepository.findByIdWithDay(
+      dto.planId,
+      dto.dayId,
+    );
 
     if (!plan) throw new NotFoundError("Workout plan not found");
 
@@ -40,12 +41,9 @@ export class StartWorkoutSession {
     if (day.workoutSessions.length > 0)
       throw new ConflictError("Workout day already has a session started");
 
-    const session = await prisma.workoutSession.create({
-      data: {
-        workoutDayId: dto.dayId,
-        startedAt: new Date(),
-      },
-    });
+    const session = await this.workoutSessionRepository.createSession(
+      dto.dayId,
+    );
 
     return { userWorkoutSessionId: session.id };
   }

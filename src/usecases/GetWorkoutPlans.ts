@@ -1,4 +1,4 @@
-import { prisma } from "../lib/db.js";
+import { IWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
 
 interface InputDto {
   userId: string;
@@ -6,23 +6,23 @@ interface InputDto {
 }
 
 interface OutputDto {
-    workoutPlans: Array<{
+  workoutPlans: Array<{
+    id: string;
+    name: string;
+    userId: string;
+    isActive: boolean;
+    estimateDurationInSeconds: number;
+    createdAt: Date;
+    updatedAt: Date;
+    workoutDays: Array<{
       id: string;
       name: string;
-      userId: string;
-      isActive: boolean;
-      estimateDurationInSeconds: number;
+      workoutPlanId: string;
+      isRestDay: boolean;
+      weekDay: string;
+      coverImageUrl: string | null;
       createdAt: Date;
       updatedAt: Date;
-      workoutDays: Array<{
-        id: string;
-        name: string;
-        workoutPlanId: string;
-        isRestDay: boolean;
-        weekDay: string;
-        coverImageUrl: string | null;
-        createdAt: Date;
-        updatedAt: Date;
       workoutExercises: Array<{
         id: string;
         name: string;
@@ -39,21 +39,15 @@ interface OutputDto {
 }
 
 export class GetWorkoutPlans {
+  constructor(
+    private readonly workoutPlanRepository: IWorkoutPlanRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
-    const plans = await prisma.workoutPlan.findMany({
-      where: {
-        userId: dto.userId,
-        ...(dto.active !== undefined && { isActive: dto.active }),
-      },
-      include: {
-        workoutDays: {
-          include: {
-            workoutExercises: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const plans = await this.workoutPlanRepository.findManyByUserId(
+      dto.userId,
+      dto.active,
+    );
 
     return {
       workoutPlans: plans.map((plan) => ({

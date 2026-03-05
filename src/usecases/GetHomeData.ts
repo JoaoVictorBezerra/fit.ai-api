@@ -3,7 +3,8 @@ import utc from "dayjs/plugin/utc.js";
 
 import { $Enums } from "../generated/prisma/client.js";
 import { WeekDay } from "../generated/prisma/enums.js";
-import { prisma } from "../lib/db.js";
+import { IWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
+import { IWorkoutSessionRepository } from "../repositories/workout/WorkoutSessionRepository.js";
 
 dayjs.extend(utc);
 
@@ -54,6 +55,11 @@ interface OutputDto {
 }
 
 export class GetHomeData {
+  constructor(
+    private readonly workoutPlanRepository: IWorkoutPlanRepository,
+    private readonly workoutSessionRepository: IWorkoutSessionRepository,
+  ) {}
+
   async execute(dto: InputDto): Promise<OutputDto> {
     const date = parseUtcDate(dto.date);
     const weekStart = date.startOf("week");
@@ -62,17 +68,10 @@ export class GetHomeData {
     const weekStartDate = weekStart.toDate();
     const weekEndDate = weekEnd.toDate();
 
-    const activeWorkoutPlan = await prisma.workoutPlan.findFirst({
-      where: { userId: dto.userId, isActive: true },
-      include: {
-        workoutDays: {
-          include: {
-            workoutExercises: true,
-            workoutSessions: true,
-          },
-        },
-      },
-    });
+    const activeWorkoutPlan =
+      await this.workoutPlanRepository.findActiveByUserIdWithDaysAndSessions(
+        dto.userId,
+      );
 
     let activeWorkoutPlanid = "";
     let todayWorkoutDay: OutputDto["todayWorkoutDay"] = null;
@@ -101,22 +100,12 @@ export class GetHomeData {
       }
     }
 
-    const workoutSessions = await prisma.workoutSession.findMany({
-      where: {
-        workoutDay: {
-          workoutPlan: {
-            userId: dto.userId,
-          },
-        },
-        startedAt: {
-          gte: weekStartDate,
-          lte: weekEndDate,
-        },
-      },
-      include: {
-        workoutDay: true,
-      },
-    });
+    const workoutSessions =
+      await this.workoutSessionRepository.findByUserInDateRange(
+        dto.userId,
+        weekStartDate,
+        weekEndDate,
+      );
 
     const consistencyByDay: OutputDto["consistencyByDay"] = {};
     let current = weekStart;
@@ -181,13 +170,12 @@ export class GetHomeData {
       const matchingPlanDay = planDays.find((d) => d.weekDay === weekDay);
       if (!matchingPlanDay) break;
 
-      const completedSession = await prisma.workoutSession.findFirst({
-        where: {
-          workoutDayId: matchingPlanDay.id,
-          completedAt: { not: null },
-          startedAt: { gte: dayStart, lte: dayEnd },
-        },
-      });
+      const completedSession =
+        await this.workoutSessionRepository.findCompletedByDayInDateRange(
+          matchingPlanDay.id,
+          dayStart,
+          dayEnd,
+        );
 
       if (!completedSession) break;
 

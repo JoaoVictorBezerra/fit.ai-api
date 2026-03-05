@@ -4,7 +4,12 @@ import z from "zod";
 
 import { authPreHandler } from "../helpers/index.js";
 import { ErrorSchema, GetStatsResponseSchema } from "../schemas/index.js";
+import { PrismaWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
+import { PrismaWorkoutSessionRepository } from "../repositories/workout/WorkoutSessionRepository.js";
 import { GetStats } from "../usecases/GetStats.js";
+
+const workoutPlanRepository = new PrismaWorkoutPlanRepository();
+const workoutSessionRepository = new PrismaWorkoutSessionRepository();
 
 export const statsRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -27,7 +32,10 @@ export const statsRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const getStats = new GetStats();
+        const getStats = new GetStats(
+          workoutPlanRepository,
+          workoutSessionRepository,
+        );
         const result = await getStats.execute({
           userId: request.session!.user.id as string,
           from: request.query.from,

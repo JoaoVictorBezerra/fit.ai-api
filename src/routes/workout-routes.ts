@@ -9,6 +9,9 @@ import {
 } from "../errors/index.js";
 import { WeekDay } from "../generated/prisma/enums.js";
 import { authPreHandler } from "../helpers/index.js";
+import { PrismaWorkoutDayRepository } from "../repositories/workout/WorkoutDayRepository.js";
+import { PrismaWorkoutPlanRepository } from "../repositories/workout/WorkoutPlanRepository.js";
+import { PrismaWorkoutSessionRepository } from "../repositories/workout/WorkoutSessionRepository.js";
 import {
   CompleteWorkoutSessionResponseSchema,
   ErrorSchema,
@@ -24,6 +27,10 @@ import { GetWorkoutDayById } from "../usecases/GetWorkoutDayById.js";
 import { GetWorkoutPlanById } from "../usecases/GetWorkoutPlanById.js";
 import { GetWorkoutPlans } from "../usecases/GetWorkoutPlans.js";
 import { StartWorkoutSession } from "../usecases/StartWorkoutSession.js";
+
+const workoutPlanRepository = new PrismaWorkoutPlanRepository();
+const workoutSessionRepository = new PrismaWorkoutSessionRepository();
+const workoutDayRepository = new PrismaWorkoutDayRepository();
 
 export const workoutPlanRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -48,7 +55,7 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const getWorkoutPlans = new GetWorkoutPlans();
+        const getWorkoutPlans = new GetWorkoutPlans(workoutPlanRepository);
         const result = await getWorkoutPlans.execute({
           userId: request.session!.user.id as string,
           active: request.query.active,
@@ -86,7 +93,9 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const getWorkoutPlanById = new GetWorkoutPlanById();
+        const getWorkoutPlanById = new GetWorkoutPlanById(
+          workoutPlanRepository,
+        );
         const result = await getWorkoutPlanById.execute({
           userId: request.session!.user.id as string,
           planId: request.params.id,
@@ -152,7 +161,9 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const createWorkoutPlan = new CreateWorkoutPlan();
+        const createWorkoutPlan = new CreateWorkoutPlan(
+          workoutPlanRepository,
+        );
         const result = await createWorkoutPlan.execute({
           userId: request.session!.user.id as string,
           name: request.body.name,
@@ -230,7 +241,9 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const getWorkoutDayById = new GetWorkoutDayById();
+        const getWorkoutDayById = new GetWorkoutDayById(
+          workoutDayRepository,
+        );
         const result = await getWorkoutDayById.execute({
           userId: request.session!.user.id as string,
           planId: request.params.planId,
@@ -281,7 +294,10 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const startWorkoutSession = new StartWorkoutSession();
+        const startWorkoutSession = new StartWorkoutSession(
+          workoutPlanRepository,
+          workoutSessionRepository,
+        );
         const result = await startWorkoutSession.execute({
           userId: request.session!.user.id as string,
           planId: request.params.planId,
@@ -336,7 +352,9 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const completeWorkoutSession = new CompleteWorkoutSession();
+        const completeWorkoutSession = new CompleteWorkoutSession(
+          workoutSessionRepository,
+        );
         const result = await completeWorkoutSession.execute({
           userWorkoutSessionId: request.params.userWorkoutSessionId,
           userId: request.session!.user.id as string,

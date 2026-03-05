@@ -6,7 +6,10 @@ import {
   ErrorSchema,
   GetUserTrainDataResponseSchema,
 } from "../schemas/index.js";
+import { PrismaUserTrainDataRepository } from "../repositories/user/UserTrainDataRepository.js";
 import { GetUserTrainData } from "../usecases/GetUserTrainData.js";
+
+const userTrainDataRepository = new PrismaUserTrainDataRepository();
 
 export const meRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
@@ -25,7 +28,9 @@ export const meRoutes = async (app: FastifyInstance) => {
     preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const getUserTrainData = new GetUserTrainData();
+        const getUserTrainData = new GetUserTrainData(
+          userTrainDataRepository,
+        );
         const result = await getUserTrainData.execute({
           userId: request.session!.user.id as string,
         });
