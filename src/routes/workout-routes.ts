@@ -8,7 +8,7 @@ import {
   NotFoundError,
 } from "../errors/index.js";
 import { WeekDay } from "../generated/prisma/enums.js";
-import { auth } from "../lib/auth.js";
+import { authPreHandler } from "../helpers/index.js";
 import {
   CompleteWorkoutSessionResponseSchema,
   ErrorSchema,
@@ -45,21 +45,12 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
+    preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers as HeadersInit,
-        });
-
-        if (!session) {
-          return reply
-            .status(401)
-            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
-        }
-
         const getWorkoutPlans = new GetWorkoutPlans();
         const result = await getWorkoutPlans.execute({
-          userId: session.user.id as string,
+          userId: request.session!.user.id as string,
           active: request.query.active,
         });
 
@@ -92,21 +83,12 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
+    preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers as HeadersInit,
-        });
-
-        if (!session) {
-          return reply
-            .status(401)
-            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
-        }
-
         const getWorkoutPlanById = new GetWorkoutPlanById();
         const result = await getWorkoutPlanById.execute({
-          userId: session.user.id as string,
+          userId: request.session!.user.id as string,
           planId: request.params.id,
         });
 
@@ -167,22 +149,12 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
-
+    preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers as HeadersInit,
-        });
-
-        if (!session) {
-          return reply
-            .status(401)
-            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
-        }
-
         const createWorkoutPlan = new CreateWorkoutPlan();
         const result = await createWorkoutPlan.execute({
-          userId: session.user.id as string,
+          userId: request.session!.user.id as string,
           name: request.body.name,
           workoutDays: request.body.workoutDays,
         });
@@ -255,21 +227,12 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
+    preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers as HeadersInit,
-        });
-
-        if (!session) {
-          return reply
-            .status(401)
-            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
-        }
-
         const getWorkoutDayById = new GetWorkoutDayById();
         const result = await getWorkoutDayById.execute({
-          userId: session.user.id as string,
+          userId: request.session!.user.id as string,
           planId: request.params.planId,
           dayId: request.params.dayId,
         });
@@ -315,21 +278,12 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
+    preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers as HeadersInit,
-        });
-
-        if (!session) {
-          return reply
-            .status(401)
-            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
-        }
-
         const startWorkoutSession = new StartWorkoutSession();
         const result = await startWorkoutSession.execute({
-          userId: session.user.id as string,
+          userId: request.session!.user.id as string,
           planId: request.params.planId,
           dayId: request.params.dayId,
         });
@@ -379,22 +333,13 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
+    preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers as HeadersInit,
-        });
-
-        if (!session) {
-          return reply
-            .status(401)
-            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
-        }
-
         const completeWorkoutSession = new CompleteWorkoutSession();
         const result = await completeWorkoutSession.execute({
           userWorkoutSessionId: request.params.userWorkoutSessionId,
-          userId: session.user.id as string,
+          userId: request.session!.user.id as string,
         });
 
         return reply.status(200).send(result);

@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import z from "zod";
 
-import { auth } from "../lib/auth.js";
+import { authPreHandler } from "../helpers/index.js";
 import { ErrorSchema, GetStatsResponseSchema } from "../schemas/index.js";
 import { GetStats } from "../usecases/GetStats.js";
 
@@ -24,21 +24,12 @@ export const statsRoutes = async (app: FastifyInstance) => {
         500: ErrorSchema,
       },
     },
+    preHandler: authPreHandler,
     handler: async (request, reply) => {
       try {
-        const session = await auth.api.getSession({
-          headers: request.headers as HeadersInit,
-        });
-
-        if (!session) {
-          return reply
-            .status(401)
-            .send({ error: "Unauthorized", code: "UNAUTHORIZED" });
-        }
-
         const getStats = new GetStats();
         const result = await getStats.execute({
-          userId: session.user.id as string,
+          userId: request.session!.user.id as string,
           from: request.query.from,
           to: request.query.to,
         });
