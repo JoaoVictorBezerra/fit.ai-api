@@ -13,6 +13,7 @@ import {
 
 import { Routes } from "./constants/index.js";
 import { auth } from "./lib/auth.js";
+import { env } from "./lib/env.js";
 import { aiRoutes } from "./routes/ai-routes.js";
 import { homeRoutes } from "./routes/home-routes.js";
 import { meRoutes } from "./routes/me-routes.js";
@@ -34,7 +35,7 @@ app.register(fastifySwagger, {
     },
     servers: [
       {
-        url: "http://localhost:8081",
+        url: env.API_BASE_URL,
         description: "Local server",
       },
       {
@@ -76,7 +77,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
 });
 
 app.register(fastifyCors, {
-  origin: ["http://localhost:8081"],
+  origin: [env.FRONTEND_BASE_URL],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -130,7 +131,7 @@ app.after(() => {
 });
 
 try {
-  await app.listen({ port: Number(process.env.PORT) || 8081 });
+  await app.listen({ port: env.PORT });
 } catch (err) {
   app.log.error(err);
   process.exit(1);
