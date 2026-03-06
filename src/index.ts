@@ -19,8 +19,23 @@ import { homeRoutes } from "./routes/home-routes.js";
 import { meRoutes } from "./routes/me-routes.js";
 import { statsRoutes } from "./routes/stats-routes.js";
 import { workoutPlanRoutes } from "./routes/workout-routes.js";
+
+const envToLogger = {
+  development: {
+    transport: {
+      target: "pino-pretty",
+      options: {
+        translateTime: "HH:MM:ss Z",
+        ignore: "pid,hostname",
+      },
+    },
+  },
+  production: true,
+  test: false,
+};
+
 const app = Fastify({
-  logger: true,
+  logger: envToLogger[env.NODE_ENV],
 });
 
 app.setValidatorCompiler(validatorCompiler);
